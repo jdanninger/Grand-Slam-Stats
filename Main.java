@@ -2,6 +2,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.FlowLayout;
+import java.awt.event.*;
 
 public class Main{
 	public static void main(String [] args) {
@@ -11,12 +12,48 @@ public class Main{
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //closes the window when it closes
 
 
-        JButton button1 = new JButton("change stadium");
+        JButton button1 = new JButton("use case 1");
+        button1.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new UseCase1();
+            }
+        });
+
         JButton button2 = new JButton("use case 2");
+        button2.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new UseCase2();
+            }
+        });
+
         JButton button3 = new JButton("use case 3");
+        button3.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new UseCase3();
+            }
+        });
+
         JButton button4 = new JButton("use case 4");
+        button4.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new UseCase4();
+            }
+        });
+
         JButton button5 = new JButton("use case 5");
+        button5.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new UseCase5();
+            }
+        });
+
         JButton button6 = new JButton("use case 6");
+        button6.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new UseCase6();
+            }
+        });
+
 
         // Creates a new Panel to put things
         JPanel panel = new JPanel();
