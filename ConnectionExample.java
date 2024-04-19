@@ -17,6 +17,7 @@ public class ConnectionExample {
 
 
         ResultSet resultSet = null;
+
         try (Connection connection = DriverManager.getConnection(connectionUrl);
         Statement statement = connection.createStatement();)
         {
@@ -27,10 +28,9 @@ public class ConnectionExample {
         while (resultSet.next()) {
             System.out.println(resultSet.getString(2) + " " + resultSet.getString(3));
         }
-  
         }
         catch (SQLException e) {
-        e.printStackTrace();
+            e.printStackTrace();
         }
     }
 }
