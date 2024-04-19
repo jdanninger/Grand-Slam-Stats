@@ -7,6 +7,7 @@ public class UseCase1 extends JFrame {
         frame.setSize(420, 420); // sets window size (x, y)
         frame.setTitle("use case 1"); // sets jframe title
 
+        System.out.println("we are at use case 1");
 
         frame.setVisible(true); //shows window
     }
