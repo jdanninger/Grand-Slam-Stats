@@ -52,13 +52,13 @@ CREATE TABLE Players (
 CREATE TABLE Games (
 	ID INT IDENTITY(1,1),
 	Season_ID INT,
-	Home_Team INT NOT NULL,
-	Away_Team INT NOt NULL,
+	Home_Team INT NOT NULL Unique,
+	Away_Team INT NOT NULL,
 	Home_Score INT,
 	Away_Score INT,
 	Date Date,
 	FOREIGN KEY (Home_Team) REFERENCES Teams(ID) on delete cascade,
-	FOREIGN KEY (Away_Team) REFERENCES Teams(ID) on delete cascade,
+	FOREIGN KEY (Away_Team) REFERENCES Teams(ID) on delete no action,
 	FOREIGN KEY (Season_ID) REFERENCES Seasons(ID) on delete cascade,
 	PRIMARY KEY (ID)
 );
@@ -93,3 +93,7 @@ CREATE TABLE Hitters (
 	Primary Key (Game_ID, Player_ID)
 );
 
+CREATE LOGIN db_user WITH PASSWORD = 'ThisIsANewPassword123@';
+USE GrandSlamStats;
+CREATE USER db_user FOR LOGIN db_user;
+ALTER ROLE db_owner ADD MEMBER db_user;
