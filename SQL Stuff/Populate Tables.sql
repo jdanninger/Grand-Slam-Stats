@@ -65,6 +65,15 @@ values(1, 3, 8, 7, 8, 1, 3, 3.2, 0, 15);
 
 Insert into Pitchers (Game_ID, Player_ID, Runs, Earned_Runs, Hits, Base_on_balls, Strike_outs, Innings_Pitched, Home_runs, Number_pitches)
 values(1, 1, 16, 9, 6, 2, 7, 6, 1, 60);
+
+insert into Arenas (Name, Owning_Team, Capacity)
+VALUES ('Citizens Bank Park', 2, 42901)
+
+insert into Arenas (Name, Owning_Team, Capacity)
+VALUES ('Nationals Park', 1, 41546)
+
+insert into Arenas (Name, Owning_Team, Capacity)
+VALUES ('Citi Field', 3, 41800)
 */
 Select * from Hitters;
 Select * from Pitchers;
