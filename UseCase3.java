@@ -1,5 +1,6 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -61,7 +62,65 @@ public class UseCase3 extends JFrame {
                 String playerId = String.valueOf(name_ids[selectPlayerCombo.getSelectedIndex()]);
                 String stat = stats[selectStatsCombo.getSelectedIndex()];
                 
-                System.out.println(stat);
+                if("SLG".equals(stat) || "OBP".equals(stat)) {
+                    ResultSet resultSet = null;
+                    try (Connection connection = DriverManager.getConnection(connectionUrl);
+                    Statement statement = connection.createStatement();)
+                    {
+                        String sql = "Select sum(Singe), sum(Doubles), sum(Triple), sum(Home_runs), sum(At_bats), sum(balls) as SLG from Hitters where Player_ID = ?;";
+                        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                        preparedStatement.setString(1, playerId);
+                        resultSet = preparedStatement.executeQuery();
+                        resultSet.next();
+                        if (resultSet.getString(1) == null){
+                            System.out.println("no result");
+                        } else {
+                            float first = resultSet.getInt(1);
+                            float second  = resultSet.getInt(2);
+                            float third = resultSet.getInt(3);
+                            float home_run  = resultSet.getInt(4);
+                            float hits = resultSet.getInt(5);
+                            float balls = resultSet.getInt(6);
+
+                            if ("SLG".equals(stat)) {
+                                System.out.println( (first+second+third+home_run)/hits );
+                            } else {
+                                System.out.println((first+second+third+home_run+balls)/hits );
+                            }
+                        }
+                    } catch (SQLException er) {
+                        er.printStackTrace();
+                    }
+                } else {
+                    ResultSet resultSet = null;
+                    try (Connection connection = DriverManager.getConnection(connectionUrl);
+                    Statement statement = connection.createStatement();)
+                    {
+                        String sql = "Select sum(Base_on_balls), sum(Hits), sum(Innings_Pitched), sum(Strike_outs) from Pitchers where Player_ID = ?;";
+                        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                        preparedStatement.setString(1, playerId);
+                        resultSet = preparedStatement.executeQuery();
+                        resultSet.next();
+                        if (resultSet.getString(1) == null){
+                            System.out.println("no result");
+                        } else {
+                            float balls = resultSet.getInt(1);
+                            float hits  = resultSet.getInt(2);
+                            float ip = resultSet.getInt(3);
+                            float kos  = resultSet.getInt(4);
+
+
+                            if ("WHIP".equals(stat)) {
+                                System.out.println((balls+hits)/ip);
+                            } else {
+                                System.out.println(kos/ip);
+                            }
+                        }
+                    } catch (SQLException er) {
+                        er.printStackTrace();
+                    }
+
+                }
 
 
 
