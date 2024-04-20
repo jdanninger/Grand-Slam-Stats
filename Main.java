@@ -40,7 +40,7 @@ public class Main{
             }
         });
 
-        JButton button5 = new JButton("use case 5");
+        JButton button5 = new JButton("Add/Remove/Modify Players");
         button5.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new UseCase5();
