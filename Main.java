@@ -33,7 +33,7 @@ public class Main{
             }
         });
 
-        JButton button4 = new JButton("use case 4");
+        JButton button4 = new JButton("Add/Remove/Modify Arenas");
         button4.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new UseCase4();
@@ -47,7 +47,7 @@ public class Main{
             }
         });
 
-        JButton button6 = new JButton("use case 6");
+        JButton button6 = new JButton("Add/Remove/Modify Leagues and Divisons");
         button6.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new UseCase6();
