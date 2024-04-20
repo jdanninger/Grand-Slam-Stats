@@ -7,7 +7,7 @@ public class UseCase6 extends JFrame {
         frame.setSize(420, 420); // sets window size (x, y)
         frame.setTitle("use case 6"); // sets jframe title
 
-
+        System.out.println("We are at user case 6");
         frame.setVisible(true); //shows window
     }
 }
