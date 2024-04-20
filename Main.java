@@ -12,7 +12,7 @@ public class Main{
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //closes the window when it closes
 
 
-        JButton button1 = new JButton("use case 1");
+        JButton button1 = new JButton("Add/Remove/Modify Game");
         button1.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new UseCase1();
