@@ -52,7 +52,7 @@ CREATE TABLE Players (
 CREATE TABLE Games (
 	ID INT IDENTITY(1,1),
 	Season_ID INT,
-	Home_Team INT NOT NULL Unique,
+	Home_Team INT NOT NULL,
 	Away_Team INT NOT NULL,
 	Home_Score INT,
 	Away_Score INT,
