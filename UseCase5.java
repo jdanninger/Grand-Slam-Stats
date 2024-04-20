@@ -103,36 +103,49 @@ public class UseCase5 extends JFrame {
          // ************************ REMOVE PLAYER PANEL ************************
         ResultSet nameSet = null;
         String[] names = new String[100];
-
+        int[] name_ids = new int[100];
          try (Connection connection = DriverManager.getConnection(connectionUrl);
         Statement statement = connection.createStatement();)
         {
-            nameSet = statement.executeQuery("SELECT CONCAT(Firstname, ' ', Lastname) AS full_name FROM Players;");
+            nameSet = statement.executeQuery("SELECT ID, CONCAT(Firstname, ' ', Lastname) AS full_name FROM Players;");
             int n = 0;
             while (nameSet.next()) {
                 System.out.println(nameSet.getString(1));
-                names[n] = nameSet.getString(1);
+                names[n] = nameSet.getString(2);
+                name_ids[n] = nameSet.getInt(1);
                 n++;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         JPanel removePlayerPanel = new JPanel();
         removePlayerPanel.setBorder(BorderFactory.createTitledBorder("Remove Player"));
         JComboBox<String> removePlayerTeamCombo = new JComboBox<>(names);
+
+        JButton submitRemove = new JButton("submit");
+        submitRemove.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String nid = String.valueOf(name_ids[removePlayerTeamCombo.getSelectedIndex()]);
+                try (Connection connection = DriverManager.getConnection(connectionUrl))
+                {
+                    String sql = "Delete Players where ID = ?;";
+                    PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                    preparedStatement.setString(1, nid);
+                    preparedStatement.executeUpdate();
+
+                } catch (SQLException er) {
+                    er.printStackTrace();
+                }
+            }
+        });
+
+
         removePlayerPanel.add(removePlayerTeamCombo);
+        removePlayerPanel.add(submitRemove);
         mainPanel.add(removePlayerPanel);
 
-
-        // ************************ Modify PLAYER PANEL ************************
-        JPanel modifyPlayerPanel = new JPanel();
-        modifyPlayerPanel.setBorder(BorderFactory.createTitledBorder("Modify Player"));
-
-        mainPanel.add(modifyPlayerPanel);
-
-
         frame.add(mainPanel);
-        frame.setVisible(true); //shows window
+        frame.setVisible(true);
+
     }
 }
