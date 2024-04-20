@@ -26,7 +26,7 @@ public class Main{
             }
         });
 
-        JButton button3 = new JButton("use case 3");
+        JButton button3 = new JButton("Calculate Player Stats");
         button3.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new UseCase3();
