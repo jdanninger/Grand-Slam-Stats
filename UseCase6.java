@@ -15,7 +15,7 @@ public class UseCase6 extends JFrame {
 
     UseCase6() {
         JFrame frame = new JFrame(); // creates Jframe (window)
-        frame.setSize(520, 700); // sets window size (x, y)
+        frame.setSize(750, 700); // sets window size (x, y)
         frame.setTitle("Add/Remove/Modify Leagues and Division"); // sets jframe title
 
         JPanel mainPanel = new JPanel();
