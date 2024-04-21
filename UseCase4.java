@@ -155,11 +155,10 @@ public class UseCase4 extends JFrame {
                 }
             }
         });
-
-        UpdateTeamName.add(new JLabel("New Team Name"));
-        UpdateTeamName.add(NewName);
         UpdateTeamName.add(new JLabel("Team:"));
         UpdateTeamName.add(Teambox);
+        UpdateTeamName.add(new JLabel("New Team Name"));
+        UpdateTeamName.add(NewName);
         UpdateTeamName.add(new JLabel("Division Change:"));
         UpdateTeamName.add(Divsionbox);
         UpdateTeamName.add(Update);
@@ -263,11 +262,10 @@ public class UseCase4 extends JFrame {
                 }
             }
         });
-
-        MakeArenaName.add(new JLabel("New Arena Name"));
-        MakeArenaName.add(NewArenaName);
         MakeArenaName.add(new JLabel("Team:"));
         MakeArenaName.add(TeamBoxCombo);
+        MakeArenaName.add(new JLabel("New Arena Name"));
+        MakeArenaName.add(NewArenaName);
         MakeArenaName.add(new JLabel("Capacity:"));
         MakeArenaName.add(NewArenaCapacity);
         MakeArenaName.add(Create);
