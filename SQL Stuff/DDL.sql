@@ -140,7 +140,7 @@ END
 GO
 
 
--- UseCase2 Stroed Porcedure
+-- UseCase2 Stored Procedure
 -- Adding Hitter Stats
 CREATE PROCEDURE AddHitterStats
     @Game_ID INT,
