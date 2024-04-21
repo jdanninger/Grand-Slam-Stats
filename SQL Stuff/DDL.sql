@@ -114,3 +114,75 @@ BEGIN
     INSERT INTO Games (Season_ID, Home_Team, Away_Team, Home_Score, Away_Score, Date)
     VALUES (@Season_ID, @Home_Team, @Away_Team, @Home_Score, @Away_Score, @Date)
 END
+GO
+
+-- Modifying Game
+CREATE PROCEDURE ModifyGame
+    @Game_ID INT,
+    @Home_Score INT,
+    @Away_Score INT,
+    @Date DATE
+AS
+BEGIN
+    UPDATE Games
+    SET Home_Score = @Home_Score, Away_Score = @Away_Score, Date = @Date
+    WHERE ID = @Game_ID
+END
+GO
+
+-- Deleting Game
+CREATE PROCEDURE DeleteGame
+    @Game_ID INT
+AS
+BEGIN
+    DELETE FROM Games WHERE ID = @Game_ID
+END
+GO
+
+
+-- UseCase2 Stroed Porcedure
+-- Adding Hitter Stats
+CREATE PROCEDURE AddHitterStats
+    @Game_ID INT,
+    @Player_ID INT,
+    @At_bats INT,
+    @Singles INT,
+    @Doubles INT,
+    @Triples INT,
+    @Home_runs INT,
+    @Balls INT
+AS
+BEGIN
+    INSERT INTO Hitters (Game_ID, Player_ID, At_bats, Single, [Double], Triple, Home_runs, Balls)
+    VALUES (@Game_ID, @Player_ID, @At_bats, @Singles, @Doubles, @Triples, @Home_runs, @Balls)
+END
+GO
+
+-- Modifying Hitter Stats
+CREATE PROCEDURE ModifyHitterStats
+    @Game_ID INT,
+    @Player_ID INT,
+    @At_bats INT,
+    @Singles INT,
+    @Doubles INT,
+    @Triples INT,
+    @Home_runs INT,
+    @Balls INT
+AS
+BEGIN
+    UPDATE Hitters
+    SET At_bats = @At_bats, Single = @Singles, [Double] = @Doubles, 
+        Triple = @Triples, Home_runs = @Home_runs, Balls = @Balls
+    WHERE Game_ID = @Game_ID AND Player_ID = @Player_ID
+END
+GO
+
+-- Deleting Hitter Stats
+CREATE PROCEDURE DeleteHitterStats
+    @Game_ID INT,
+    @Player_ID INT
+AS
+BEGIN
+    DELETE FROM Hitters WHERE Game_ID = @Game_ID AND Player_ID = @Player_ID
+END
+GO

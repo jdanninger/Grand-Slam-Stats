@@ -211,7 +211,7 @@ public class UseCase1 extends JFrame {
     
     
 
-    
+
 
     //Set up UI for modify games
     private JPanel createModifyGamePanel() {
@@ -263,26 +263,52 @@ public class UseCase1 extends JFrame {
 
 
     private void modifyGame(String gameId, String newHomeScore, String newAwayScore, String newDate) {
-        String sql = "UPDATE Games SET Home_Score = ?, Away_Score = ?, Date = ? WHERE ID = ?";
-        try (Connection conn = DriverManager.getConnection(connectionUrl);
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(connectionUrl);
+            conn.setAutoCommit(false); // Start transaction
     
-            ps.setInt(1, Integer.parseInt(newHomeScore));
-            ps.setInt(2, Integer.parseInt(newAwayScore));
-            ps.setDate(3, Date.valueOf(newDate));
-            ps.setInt(4, Integer.parseInt(gameId));
+            CallableStatement cs = conn.prepareCall("{call ModifyGame(?, ?, ?, ?)}");
     
-            int affectedRows = ps.executeUpdate();
+            int gameIdInt = Integer.parseInt(gameId);
+            int homeScore = Integer.parseInt(newHomeScore);
+            int awayScore = Integer.parseInt(newAwayScore);
+            Date gameDate = Date.valueOf(newDate); // Assumes the date field is properly formatted
+    
+            cs.setInt(1, gameIdInt);
+            cs.setInt(2, homeScore);
+            cs.setInt(3, awayScore);
+            cs.setDate(4, gameDate);
+    
+            int affectedRows = cs.executeUpdate();
             if (affectedRows > 0) {
+                conn.commit(); // Commit transaction
                 JOptionPane.showMessageDialog(this, "Game modified successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "No changes made.", "Info", JOptionPane.INFORMATION_MESSAGE);
+                conn.rollback(); // Rollback transaction
+                JOptionPane.showMessageDialog(this, "No game was modified.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } catch (SQLException | NumberFormatException ex) {
             ex.printStackTrace();
+            try {
+                if (conn != null) conn.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
             JOptionPane.showMessageDialog(this, "Error modifying game: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
         }
     }
+    
+    
 
     
 
@@ -320,24 +346,38 @@ public class UseCase1 extends JFrame {
     }
     
 
-    private void deleteGame(String gameId) {
-        String sql = "DELETE FROM Games WHERE ID = ?";
-        try (Connection conn = DriverManager.getConnection(connectionUrl);
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-    
-            ps.setInt(1, Integer.parseInt(gameId));
-    
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows > 0) {
-                JOptionPane.showMessageDialog(this, "Game deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "No game found with that ID.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (SQLException | NumberFormatException ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error deleting game: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+// Corrected deleteGame method example
+private void deleteGame(String gameId) {
+    // Use try-with-resources to ensure the connection and callable statement are closed properly
+    try (Connection conn = DriverManager.getConnection(connectionUrl);
+         CallableStatement cs = conn.prepareCall("{call DeleteGame(?)}")) {
+        
+        // Convert the string to an integer
+        int gameID = Integer.parseInt(gameId);
+
+        // Set auto-commit to false to manage the transaction
+        conn.setAutoCommit(false);
+
+        cs.setInt(1, gameID);
+
+        int affectedRows = cs.executeUpdate();
+        if (affectedRows > 0) {
+            // Commit the transaction if the deletion was successful
+            conn.commit();
+            JOptionPane.showMessageDialog(this, "Game deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            // If no rows were deleted, rollback the transaction
+            conn.rollback();
+            JOptionPane.showMessageDialog(this, "No game was deleted.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    } catch (SQLException | NumberFormatException ex) {
+        // Handle both SQL and number format exceptions
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Error deleting game: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
+    // Auto-commit state and closing of resources are handled automatically
+}
+
     
 
     public static void main(String[] args) {
