@@ -63,6 +63,8 @@ public class UseCase1 extends JFrame {
         }
     }
 
+
+    //UI Set up for add games
     private JPanel createAddGamePanel() {
         JPanel addGamePanel = new JPanel();
         addGamePanel.setBorder(BorderFactory.createTitledBorder("Add Game"));
@@ -95,6 +97,8 @@ public class UseCase1 extends JFrame {
         return addGamePanel;
     }
 
+
+
     private int getTeamId(String teamName) {
         int teamId = -1;
         String query = "SELECT ID FROM Teams WHERE Name = ?";
@@ -112,47 +116,8 @@ public class UseCase1 extends JFrame {
         }
         return teamId;
     }
-    
 
-    private void addGame() {
-        String selectedSeasonYear = (String) seasonComboBox.getSelectedItem();
-        String homeTeam = (String) homeTeamComboBox.getSelectedItem();
-        String awayTeam = (String) awayTeamComboBox.getSelectedItem();
-        int homeScore = Integer.parseInt(homeScoreField.getText());
-        int awayScore = Integer.parseInt(awayScoreField.getText());
-        String date = dateField.getText();
-    
-        // Convert team names to IDs
-        int homeTeamId = getTeamId(homeTeam);
-        int awayTeamId = getTeamId(awayTeam);
-        int seasonId = getSeasonIdByYear(selectedSeasonYear);  // Make sure to retrieve the correct season ID
-    
-        if (homeTeamId == -1 || awayTeamId == -1 || seasonId == -1) {
-            JOptionPane.showMessageDialog(this, "Invalid team or season", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-    
-        String sql = "INSERT INTO Games (Season_ID, Home_Team, Away_Team, Home_Score, Away_Score, Date) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DriverManager.getConnection(connectionUrl);
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-    
-            ps.setInt(1, seasonId);
-            ps.setInt(2, homeTeamId);
-            ps.setInt(3, awayTeamId);
-            ps.setInt(4, homeScore);
-            ps.setInt(5, awayScore);
-            ps.setDate(6, Date.valueOf(date)); // Assumes the date field is properly formatted
-    
-            int affectedRows = ps.executeUpdate();
-            if (affectedRows > 0) {
-                JOptionPane.showMessageDialog(this, "Game added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            }
-        } catch (SQLException | NumberFormatException ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error adding game: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
+
     private int getSeasonIdByYear(String year) {
         String query = "SELECT ID FROM Seasons WHERE YEAR(Year) = ?";
         try (Connection conn = DriverManager.getConnection(connectionUrl);
@@ -167,10 +132,88 @@ public class UseCase1 extends JFrame {
         }
         return -1; // Return -1 if season is not found or an error occurs
     }
-    
+
     
 
 
+    private void addGame() {
+        Connection conn = null;
+        try {
+            // Retrieve data from GUI fields
+            String selectedSeasonYear = (String) seasonComboBox.getSelectedItem();
+            String homeTeam = (String) homeTeamComboBox.getSelectedItem();
+            String awayTeam = (String) awayTeamComboBox.getSelectedItem();
+            int homeScore = Integer.parseInt(homeScoreField.getText());
+            int awayScore = Integer.parseInt(awayScoreField.getText());
+            String date = dateField.getText();
+    
+            // Convert team names to IDs
+            int homeTeamId = getTeamId(homeTeam);
+            int awayTeamId = getTeamId(awayTeam);
+            int seasonId = getSeasonIdByYear(selectedSeasonYear);
+    
+            if (homeTeamId == -1 || awayTeamId == -1 || seasonId == -1) {
+                JOptionPane.showMessageDialog(this, "Invalid team or season", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+    
+            // Initialize connection
+            conn = DriverManager.getConnection(connectionUrl);
+    
+            // Start transaction
+            conn.setAutoCommit(false);
+    
+            // Prepared call to stored procedure
+            String sql = "{call AddGame(?, ?, ?, ?, ?, ?)}";
+            try (CallableStatement cs = conn.prepareCall(sql)) {
+                cs.setInt(1, seasonId);
+                cs.setInt(2, homeTeamId);
+                cs.setInt(3, awayTeamId);
+                cs.setInt(4, homeScore);
+                cs.setInt(5, awayScore);
+                cs.setDate(6, Date.valueOf(date)); // Assumes the date field is properly formatted
+    
+                int affectedRows = cs.executeUpdate();
+    
+                if (affectedRows > 0) {
+                    // Commit the transaction if row is added
+                    conn.commit();
+                    JOptionPane.showMessageDialog(this, "Game added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    // If no rows affected, rollback and show error
+                    conn.rollback();
+                    JOptionPane.showMessageDialog(this, "No game added.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+    
+        } catch (SQLException | NumberFormatException ex) {
+            // Print stack trace and rollback transaction
+            ex.printStackTrace();
+            try {
+                if (conn != null) conn.rollback();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+            JOptionPane.showMessageDialog(this, "Error adding game: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    
+        } finally {
+            // Finally, ensure auto-commit is reset and connection is closed
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+    }
+    
+    
+
+    
+
+    //Set up UI for modify games
     private JPanel createModifyGamePanel() {
         JPanel modifyGamePanel = new JPanel();
         modifyGamePanel.setBorder(BorderFactory.createTitledBorder("Modify Game"));
@@ -216,6 +259,9 @@ public class UseCase1 extends JFrame {
         return modifyGamePanel;
     }
     
+
+
+
     private void modifyGame(String gameId, String newHomeScore, String newAwayScore, String newDate) {
         String sql = "UPDATE Games SET Home_Score = ?, Away_Score = ?, Date = ? WHERE ID = ?";
         try (Connection conn = DriverManager.getConnection(connectionUrl);
@@ -239,6 +285,9 @@ public class UseCase1 extends JFrame {
     }
 
     
+
+
+    //Set up UI for delete games
     private JPanel createDeleteGamePanel() {
         JPanel deleteGamePanel = new JPanel();
         deleteGamePanel.setBorder(BorderFactory.createTitledBorder("Delete Game"));
@@ -270,6 +319,7 @@ public class UseCase1 extends JFrame {
         return deleteGamePanel;
     }
     
+
     private void deleteGame(String gameId) {
         String sql = "DELETE FROM Games WHERE ID = ?";
         try (Connection conn = DriverManager.getConnection(connectionUrl);

@@ -97,3 +97,20 @@ CREATE LOGIN db_user WITH PASSWORD = 'ThisIsANewPassword123@';
 USE GrandSlamStats;
 CREATE USER db_user FOR LOGIN db_user;
 ALTER ROLE db_owner ADD MEMBER db_user;
+
+
+
+
+-- UseCase1 Stored Procedure
+CREATE PROCEDURE AddGame
+    @Season_ID INT,
+    @Home_Team INT,
+    @Away_Team INT,
+    @Home_Score INT,
+    @Away_Score INT,
+    @Date DATE
+AS
+BEGIN
+    INSERT INTO Games (Season_ID, Home_Team, Away_Team, Home_Score, Away_Score, Date)
+    VALUES (@Season_ID, @Home_Team, @Away_Team, @Home_Score, @Away_Score, @Date)
+END
