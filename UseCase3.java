@@ -10,6 +10,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import java.awt.event.*;
 
 public class UseCase3 extends JFrame {
@@ -55,13 +57,16 @@ public class UseCase3 extends JFrame {
         String[] stats = new String[] {"SLG", "OBP", "WHIP", "KO/IP"};
         JComboBox<String> selectStatsCombo = new JComboBox<>(stats);
         panel.add(selectStatsCombo);
+        JTextField textField = new JTextField(20);
+        textField.setVisible(false); // Initially invisible
+        panel.add(textField);
         // Event handling 
         JButton submit = new JButton("Calculate Stat");
         submit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String playerId = String.valueOf(name_ids[selectPlayerCombo.getSelectedIndex()]);
                 String stat = stats[selectStatsCombo.getSelectedIndex()];
-                
+                String result = "";
                 if("SLG".equals(stat) || "OBP".equals(stat)) {
                     ResultSet resultSet = null;
                     try (Connection connection = DriverManager.getConnection(connectionUrl);
@@ -73,7 +78,7 @@ public class UseCase3 extends JFrame {
                         resultSet = preparedStatement.executeQuery();
                         resultSet.next();
                         if (resultSet.getString(1) == null){
-                            System.out.println("no result");
+                            result =  "no result";
                         } else {
                             float first = resultSet.getInt(1);
                             float second  = resultSet.getInt(2);
@@ -83,9 +88,9 @@ public class UseCase3 extends JFrame {
                             float balls = resultSet.getInt(6);
 
                             if ("SLG".equals(stat)) {
-                                System.out.println( (first+second+third+home_run)/hits );
+                                result =  String.valueOf((first+second+third+home_run)/hits);
                             } else {
-                                System.out.println((first+second+third+home_run+balls)/hits );
+                                result =  String.valueOf((first+second+third+home_run+balls)/hits );
                             }
                         }
                     } catch (SQLException er) {
@@ -102,7 +107,7 @@ public class UseCase3 extends JFrame {
                         resultSet = preparedStatement.executeQuery();
                         resultSet.next();
                         if (resultSet.getString(1) == null){
-                            System.out.println("no result");
+                            result =  "no result";
                         } else {
                             float balls = resultSet.getInt(1);
                             float hits  = resultSet.getInt(2);
@@ -111,16 +116,20 @@ public class UseCase3 extends JFrame {
 
 
                             if ("WHIP".equals(stat)) {
-                                System.out.println((balls+hits)/ip);
+                                result =  String.valueOf((balls+hits)/ip);
                             } else {
-                                System.out.println(kos/ip);
+                                result =  String.valueOf(kos/ip);
                             }
+                            
                         }
+                        
                     } catch (SQLException er) {
                         er.printStackTrace();
                     }
 
                 }
+                textField.setVisible(true); // Make text box visible
+                textField.setText(result); 
 
 
 
