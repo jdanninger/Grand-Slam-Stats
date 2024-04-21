@@ -1,10 +1,5 @@
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-
 import javax.swing.*;
-import javax.swing.text.MaskFormatter;
-
 import java.awt.event.*;
 
 public class UseCase6 extends JFrame {
@@ -33,11 +28,10 @@ public class UseCase6 extends JFrame {
         mainPanel.add(updateLeague());
         mainPanel.add(updateDivison());
 
-
         add(mainPanel);
         setVisible(true);
 
-        System.out.println("We are at User Case 4");
+        System.out.println("We are at User Case 6");
         frame.add(mainPanel);
         frame.setVisible(true);
     }
@@ -47,36 +41,20 @@ public class UseCase6 extends JFrame {
         addTeamSection.setBorder(BorderFactory.createTitledBorder("Add Leagues"));
 
         JTextField BaseballLeague = new JTextField(25);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        dateFormat.setLenient(false); // Set lenient to false to strictly enforce the format
-
-        // Create a formatter for the JFormattedTextField
-        MaskFormatter dateMask = null;
-        try {
-            dateMask = new MaskFormatter("####-##-##");
-            dateMask.setPlaceholderCharacter('_');
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        // Create a JFormattedTextField with the date mask
-        JFormattedTextField dateField = new JFormattedTextField(dateMask);
-        dateField.setColumns(10); // Set the column size to fit typical date like 2020-01-01
+        JTextField Start_Date = new JTextField(10);
 
         JButton Create = new JButton("Create");
         Create.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String NewLeague = BaseballLeague.getText();
-                String Created = dateField.getText();
+                String When_Created = Start_Date.getText();
                 try (Connection connection = DriverManager.getConnection(connectionUrl))
                 {
-                    String sql = "INSERT INTO Leagues(Name, Start_Date) VALUES(?,?)";
+                    String sql = "Begin Exec AddLeague ?,? End";
                     PreparedStatement preparedStatement = connection.prepareStatement(sql);
                     preparedStatement.setString(1, NewLeague);
-                    preparedStatement.setString(2, Created);
-
+                    preparedStatement.setDate(2,Date.valueOf(When_Created));
                     int rowsInserted = preparedStatement.executeUpdate();
-
                     if (rowsInserted > 0) {
                         System.out.println("A New League is successfully created.");
                     }
@@ -89,10 +67,11 @@ public class UseCase6 extends JFrame {
         addTeamSection.add(new JLabel("New League"));
         addTeamSection.add(BaseballLeague);
         addTeamSection.add(new JLabel("Starting Date(yyyy-mm-dd):"));
-        addTeamSection.add(dateField);
+        addTeamSection.add(Start_Date);
         addTeamSection.add(Create);
         return addTeamSection;
     }
+
     private JPanel AddNewDivison(){
         ResultSet LeagueSet = null;
         String[] Leagues = new String[100];
@@ -111,7 +90,7 @@ public class UseCase6 extends JFrame {
         }
 
         JPanel addDivisionSection = new JPanel();
-        addDivisionSection.setBorder(BorderFactory.createTitledBorder("Add Teams"));
+        addDivisionSection.setBorder(BorderFactory.createTitledBorder("Add Divisions"));
 
         JTextField NewDivision = new JTextField(25);
         JComboBox<String> LeagueCombo = new JComboBox<>(Leagues);
@@ -122,15 +101,17 @@ public class UseCase6 extends JFrame {
                 String LeagueChoice = Leagues[LeagueCombo.getSelectedIndex()];
                 try (Connection connection = DriverManager.getConnection(connectionUrl))
                 {
-                    String sql = "INSERT INTO Divisons (Name, League_ID) VALUES (?, (Select ID From Leagues where Name = ?))";
+                    String sql = "Begin Exec AddDivision ?,? End";
                     PreparedStatement preparedStatement = connection.prepareStatement(sql);
                     preparedStatement.setString(1, CreateDivision);
                     preparedStatement.setString(2, LeagueChoice);
-
                     int rowsInserted = preparedStatement.executeUpdate();
-
                     if (rowsInserted > 0) {
+                        connection.commit();
                         System.out.println("A New Division Has Been Inserted Successfully.");
+                    }
+                    else {
+                        connection.rollback();
                     }
                 } catch (SQLException er) {
                     er.printStackTrace();
@@ -172,14 +153,19 @@ public class UseCase6 extends JFrame {
                 String League_to_Delete = Leagues[LeagueBox.getSelectedIndex()];
                 try (Connection connection = DriverManager.getConnection(connectionUrl))
                 {
-                    String sql = "Delete From Leagues Where Name = ?";
+                    String sql = "Begin EXEC deleteLeague ? End";
                     PreparedStatement preparedStatement = connection.prepareStatement(sql);
                     preparedStatement.setString(1, League_to_Delete);
 
-                    int rowsInserted = preparedStatement.executeUpdate();
+                    int rowsDeleted = preparedStatement.executeUpdate();
 
-                    if (rowsInserted > 0) {
+                    if (rowsDeleted > 0) {
+                        connection.commit();
                         System.out.println("The League Has Been Removed Successfully. Also, all the division in this league were also deleted.");
+                    }
+                    else {
+                        connection.rollback();
+
                     }
                 } catch (SQLException error) {
                     error.printStackTrace();
@@ -218,14 +204,16 @@ public class UseCase6 extends JFrame {
                 String Division_to_Delete = Divisions[DivisionBox.getSelectedIndex()];
                 try (Connection connection = DriverManager.getConnection(connectionUrl))
                 {
-                    String sql = "Delete From Divisons where name = ?";
+                    String sql = "Begin Exec deleteDivision ? End";
                     PreparedStatement preparedStatement = connection.prepareStatement(sql);
                     preparedStatement.setString(1, Division_to_Delete);
-
-                    int rowsInserted = preparedStatement.executeUpdate();
-
-                    if (rowsInserted > 0) {
+                    int rowsDeleted = preparedStatement.executeUpdate();
+                    if (rowsDeleted > 0) {
+                        connection.commit();
                         System.out.println("The Division Has Been Removed Successfully.");
+                    }
+                    else {
+                        connection.rollback();
                     }
                 } catch (SQLException error) {
                     error.printStackTrace();
@@ -237,6 +225,7 @@ public class UseCase6 extends JFrame {
         RemoveDivision.add(Delete);
         return RemoveDivision;
     }
+
     private JPanel updateLeague(){
         ResultSet LeagueList = null;
         String[] Leagues = new String[100];
@@ -258,40 +247,29 @@ public class UseCase6 extends JFrame {
         UpdateLeague.setBorder(BorderFactory.createTitledBorder("Update Leagues"));
 
         JTextField NameUpdate = new JTextField(25);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        dateFormat.setLenient(false); // Set lenient to false to strictly enforce the format
-
-        // Create a formatter for the JFormattedTextField
-        MaskFormatter dateMask = null;
-        try {
-            dateMask = new MaskFormatter("####-##-##");
-            dateMask.setPlaceholderCharacter('_');
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        // Create a JFormattedTextField with the date mask
-        JFormattedTextField newdate = new JFormattedTextField(dateMask);
-        newdate.setColumns(10); // Set the column size to fit typical date like 2020-01-01
-
+        JTextField DateUpdate = new JTextField(10);
         JComboBox<String> LeagueBox = new JComboBox<>(Leagues);
         JButton Update = new JButton("Update");
         Update.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String newName = NameUpdate.getText();
-                String UpdateDate = newdate.getText();
+                String newDate = DateUpdate.getText();
                 String OriginalName = Leagues[LeagueBox.getSelectedIndex()];
                 try (Connection connection = DriverManager.getConnection(connectionUrl))
                 {
-                    String sql = "Update League SET Name = ?, date = ? Where Name = ?";
+                    String sql = "Begin Exec UpdateLeague ?,?,? End";
                     PreparedStatement preparedStatement = connection.prepareStatement(sql);
                     preparedStatement.setString(1, newName);
-                    preparedStatement.setString(2, UpdateDate);
+                    preparedStatement.setDate(2,Date.valueOf(newDate));
                     preparedStatement.setString(3, OriginalName);
-                    int rowsInserted = preparedStatement.executeUpdate();
+                    int rowsUpdated = preparedStatement.executeUpdate();
 
-                    if (rowsInserted > 0) {
-                        System.out.println("The League Has Been Update Successfully.");
+                    if (rowsUpdated > 0) {
+                        connection.commit();
+                        System.out.println("The League Has Been Updated Successfully.");
+                    }
+                    else{
+                        connection.rollback();
                     }
                 } catch (SQLException error) {
                     error.printStackTrace();
@@ -303,7 +281,7 @@ public class UseCase6 extends JFrame {
         UpdateLeague.add(new JLabel("New Name"));
         UpdateLeague.add(NameUpdate);
         UpdateLeague.add(new JLabel("New Date"));
-        UpdateLeague.add(newdate);
+        UpdateLeague.add(DateUpdate);
         UpdateLeague.add(Update);
         return UpdateLeague;
     }
@@ -355,15 +333,18 @@ public class UseCase6 extends JFrame {
                 String Division = Divisions[DivisionBox.getSelectedIndex()];
                 try (Connection connection = DriverManager.getConnection(connectionUrl))
                 {
-                    String sql = "Update Divisons SET name = ?, League_ID = (select ID from League where name = ?) where name = ?";
+                    String sql = "Begin Exec UpdateDivision ?,?,? End";
                     PreparedStatement preparedStatement = connection.prepareStatement(sql);
                     preparedStatement.setString(1, newName);
                     preparedStatement.setString(2, NewLeague);
                     preparedStatement.setString(3, Division);
-                    int rowsInserted = preparedStatement.executeUpdate();
-
-                    if (rowsInserted > 0) {
+                    int rowsUpdated = preparedStatement.executeUpdate();
+                    if (rowsUpdated > 0) {
+                        connection.commit();
                         System.out.println("The Division Has Been Updated Successfully.");
+                    }
+                    else{
+                        connection.rollback();
                     }
                 } catch (SQLException error) {
                     error.printStackTrace();

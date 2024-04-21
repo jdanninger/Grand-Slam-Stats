@@ -186,3 +186,135 @@ BEGIN
     DELETE FROM Hitters WHERE Game_ID = @Game_ID AND Player_ID = @Player_ID
 END
 GO
+
+--Use Case 4 Add/Modify/Delete Teams and Arena
+------Add Team
+Create Procedure AddTeam
+	@Name Varchar(50),
+	@Divison Varchar(50)
+AS
+Begin
+	Insert into Teams (Name, Divison_ID)
+	VALUES (@Name, (Select ID from Divisons where name = @Divison));
+End;
+
+------ Update Team
+Create Procedure UpdateTeam
+	@Name Varchar(50),
+	@Division Varchar(50),
+	@Original_Name Varchar(50)
+As
+Begin
+	UPDATE Teams
+	SET name = @Name, Divison_ID = (Select ID from Divisons where name = @Division)
+	Where name = @Original_Name
+END
+
+------ Delete Team
+Create Procedure deleteTeam
+	@Name Varchar(50)
+AS
+Begin
+	Delete From Teams
+	Where name = @Name
+End
+
+----- AddArena
+Create Procedure AddArena
+	@Name Varchar(50),
+	@OwningTeam Varchar(50),
+	@Capacity int
+AS
+Begin
+	Insert Into Arenas (Name, Owning_Team,Capacity)
+	VALUES (@Name, (Select ID from Teams where name = @OwningTeam), @Capacity);
+End
+
+--------- UpdateArena
+Create Procedure UpdateArena
+	@NewName Varchar(50),
+	@Changable_Team Varchar(50),
+	@NewCapacity Int,
+	@OriginalName Varchar(50)
+AS
+Begin
+	Update Arenas 
+	SET Name = @NewName, 
+		Owning_Team = (select ID from teams where name = @Changable_Team),
+		Capacity = @NewCapacity
+	Where name = @OriginalName
+End
+
+------- Delete Arena
+Create Procedure deleteArena
+	@Name Varchar(50)
+AS
+Begin
+	Delete from Arenas
+	Where name = @Name
+End
+
+--Use Case 6 Add/Delete/Modify Leagues and Divisions
+----- Add a League
+Create Procedure AddLeague
+	@Name varchar(50),
+	@Date date
+AS
+Begin
+	Insert Into Leagues (Name, Start_Date)
+	VALUES (@Name, @Date)
+End
+
+-----Add Divisions in League
+Create Procedure AddDivision
+	@Name Varchar(50),
+	@League Varchar(50)
+As
+Begin
+	Insert Into Divisons (Name, League_id)
+	VALUES (@Name, (Select ID from Leagues where name = @League))
+End
+
+------- Delete Leagues
+Create Procedure deleteLeague
+	@Name Varchar(50)
+AS
+Begin
+	Delete From Leagues
+	Where name = @Name
+End
+------- Delete Divisions
+Create Procedure deleteDivision
+	@Name Varchar(50)
+AS
+Begin	
+	Delete from Divisons
+	Where name = @Name
+End
+
+----- Update Leagues
+​​Create Procedure UpdateLeague
+	@New_Name Varchar(50),
+	@New_Date Date,
+	@Original_Name Varchar(50)
+AS
+Begin
+	Update Leagues
+	SET name = @New_Name, Start_Date = @New_Date
+	Where name = @Original_Name
+End
+
+------- Update Divisions
+Create Procedure UpdateDivision
+	@NewName Varchar(50),
+	@Changable_League Varchar(50),
+	@OriginalName Varchar(50)
+AS
+BEGIN
+	Begin Transaction
+	UPDATE Divisons
+	SET name = @NewName, League_id = (Select ID from Leagues where name = @Changable_League)
+	WHERE name = @OriginalName
+	Commit Transaction
+END
+
