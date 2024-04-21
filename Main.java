@@ -33,7 +33,7 @@ public class Main{
             }
         });
 
-        JButton button4 = new JButton("Add/Remove/Modify Arenas");
+        JButton button4 = new JButton("Add/Remove/Modify Teams and Arenas");
         button4.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new UseCase4();
