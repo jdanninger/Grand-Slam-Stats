@@ -80,10 +80,10 @@ public class UseCase2 extends JFrame {
         try (Connection connection = DriverManager.getConnection(connectionUrl);
              Statement statement = connection.createStatement()) {
     
-            // 清空下拉框，避免重复项
+
             gameIDComboBox.removeAllItems();
     
-            // 从 Games 表加载游戏 ID
+
             ResultSet gameSet = statement.executeQuery("SELECT ID FROM Games ORDER BY Date DESC");
             while (gameSet.next()) {
                 gameIDComboBox.addItem(gameSet.getInt("ID"));
@@ -98,10 +98,10 @@ public class UseCase2 extends JFrame {
         try (Connection connection = DriverManager.getConnection(connectionUrl);
              Statement statement = connection.createStatement()) {
     
-            // 清空下拉框，避免重复项
+
             playerIDComboBox.removeAllItems();
     
-            // 假设存在 Players 表，并且有一个名为 ID 的列
+
             ResultSet playerSet = statement.executeQuery("SELECT ID FROM Players ORDER BY ID");
             while (playerSet.next()) {
                 playerIDComboBox.addItem(playerSet.getInt("ID"));
@@ -114,8 +114,6 @@ public class UseCase2 extends JFrame {
     
     
     
-
-
 
     private void addHitterStats() {
         int gameID = (Integer) gameIDComboBox.getSelectedItem();
@@ -152,6 +150,8 @@ public class UseCase2 extends JFrame {
             JOptionPane.showMessageDialog(this, "Error adding statistics: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+    
     private void modifyHitterStats() {
         int gameID = (Integer) gameIDComboBox.getSelectedItem();
         int playerID = (Integer) playerIDComboBox.getSelectedItem();
