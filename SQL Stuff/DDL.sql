@@ -99,9 +99,14 @@ CREATE USER db_user FOR LOGIN db_user;
 ALTER ROLE db_owner ADD MEMBER db_user;
 
 
+CREATE INDEX fn_indx ON Players (Firstname);
+CREATE INDEX ln_indx ON Players (Lastname);
 
+CREATE INDEX hitter_indx ON Hitters (Player_ID);
+CREATE INDEX pithcer_indx ON Pitchers (Player_ID); -- added index to make pitcher/hitter search faster for stats
 
 -- UseCase1 Stored Procedure
+GO
 CREATE PROCEDURE AddGame
     @Season_ID INT,
     @Home_Team INT,
@@ -140,7 +145,7 @@ END
 GO
 
 
--- UseCase2 Stored Procedure
+-- UseCase2 Stroed Porcedure
 -- Adding Hitter Stats
 CREATE PROCEDURE AddHitterStats
     @Game_ID INT,
@@ -153,7 +158,7 @@ CREATE PROCEDURE AddHitterStats
     @Balls INT
 AS
 BEGIN
-    INSERT INTO Hitters (Game_ID, Player_ID, At_bats, Single, [Double], Triple, Home_runs, Balls)
+    INSERT INTO Hitters (Game_ID, Player_ID, At_bats, Single, [Doubles], Triple, Home_runs, Balls)
     VALUES (@Game_ID, @Player_ID, @At_bats, @Singles, @Doubles, @Triples, @Home_runs, @Balls)
 END
 GO
@@ -171,7 +176,7 @@ CREATE PROCEDURE ModifyHitterStats
 AS
 BEGIN
     UPDATE Hitters
-    SET At_bats = @At_bats, Single = @Singles, [Double] = @Doubles, 
+    SET At_bats = @At_bats, Single = @Singles, [Doubles] = @Doubles, 
         Triple = @Triples, Home_runs = @Home_runs, Balls = @Balls
     WHERE Game_ID = @Game_ID AND Player_ID = @Player_ID
 END
@@ -187,8 +192,6 @@ BEGIN
 END
 GO
 
---Use Case 4 Add/Modify/Delete Teams and Arena
-------Add Team
 Create Procedure AddTeam
 	@Name Varchar(50),
 	@Divison Varchar(50)
@@ -196,9 +199,9 @@ AS
 Begin
 	Insert into Teams (Name, Divison_ID)
 	VALUES (@Name, (Select ID from Divisons where name = @Divison));
-End;
+End
+GO
 
------- Update Team
 Create Procedure UpdateTeam
 	@Name Varchar(50),
 	@Division Varchar(50),
@@ -209,8 +212,8 @@ Begin
 	SET name = @Name, Divison_ID = (Select ID from Divisons where name = @Division)
 	Where name = @Original_Name
 END
+go
 
------- Delete Team
 Create Procedure deleteTeam
 	@Name Varchar(50)
 AS
@@ -218,8 +221,8 @@ Begin
 	Delete From Teams
 	Where name = @Name
 End
+GO
 
------ AddArena
 Create Procedure AddArena
 	@Name Varchar(50),
 	@OwningTeam Varchar(50),
@@ -229,8 +232,8 @@ Begin
 	Insert Into Arenas (Name, Owning_Team,Capacity)
 	VALUES (@Name, (Select ID from Teams where name = @OwningTeam), @Capacity);
 End
+GO
 
---------- UpdateArena
 Create Procedure UpdateArena
 	@NewName Varchar(50),
 	@Changable_Team Varchar(50),
@@ -244,8 +247,8 @@ Begin
 		Capacity = @NewCapacity
 	Where name = @OriginalName
 End
+GO
 
-------- Delete Arena
 Create Procedure deleteArena
 	@Name Varchar(50)
 AS
@@ -253,68 +256,90 @@ Begin
 	Delete from Arenas
 	Where name = @Name
 End
+GO
 
---Use Case 6 Add/Delete/Modify Leagues and Divisions
------ Add a League
-Create Procedure AddLeague
-	@Name varchar(50),
-	@Date date
-AS
-Begin
-	Insert Into Leagues (Name, Start_Date)
-	VALUES (@Name, @Date)
-End
+CREATE INDEX pid_indx ON Players (ID); -- index player ID since players are often searched by ID for modify and calculate stats
+CREATE INDEX hitter_indx ON Hitters (Player_ID);
+CREATE INDEX pithcer_indx ON Pitchers (Player_ID); -- added index to make pitcher/hitter search faster for stats
 
------Add Divisions in League
-Create Procedure AddDivision
-	@Name Varchar(50),
-	@League Varchar(50)
-As
-Begin
-	Insert Into Divisons (Name, League_id)
-	VALUES (@Name, (Select ID from Leagues where name = @League))
-End
-
-------- Delete Leagues
-Create Procedure deleteLeague
-	@Name Varchar(50)
-AS
-Begin
-	Delete From Leagues
-	Where name = @Name
-End
-------- Delete Divisions
-Create Procedure deleteDivision
-	@Name Varchar(50)
-AS
-Begin	
-	Delete from Divisons
-	Where name = @Name
-End
-
------ Update Leagues
-​​Create Procedure UpdateLeague
-	@New_Name Varchar(50),
-	@New_Date Date,
-	@Original_Name Varchar(50)
-AS
-Begin
-	Update Leagues
-	SET name = @New_Name, Start_Date = @New_Date
-	Where name = @Original_Name
-End
-
-------- Update Divisions
-Create Procedure UpdateDivision
-	@NewName Varchar(50),
-	@Changable_League Varchar(50),
-	@OriginalName Varchar(50)
+GO
+CREATE PROCEDURE GetPlayerFullName
 AS
 BEGIN
-	Begin Transaction
-	UPDATE Divisons
-	SET name = @NewName, League_id = (Select ID from Leagues where name = @Changable_League)
-	WHERE name = @OriginalName
-	Commit Transaction
+    SELECT ID, CONCAT(Firstname, ' ', Lastname) AS full_name FROM Players;
 END
+GO
+
+CREATE PROCEDURE CalculateSLG
+    @PlayerID INT
+AS
+BEGIN
+    SELECT 
+        SUM(Single) AS TotalSingles,
+        SUM(Doubles) AS TotalDoubles,
+        SUM(Triple) AS TotalTriples,
+        SUM(Home_runs) AS TotalHomeRuns,
+        SUM(At_bats) AS TotalAtBats,
+        SUM(Balls) AS TotalBalls,
+        CASE 
+            WHEN SUM(At_bats) = 0 THEN 0 
+            ELSE (SUM(Single) + SUM(Doubles) * 2 + SUM(Triple) * 3 + SUM(Home_runs) * 4) / CAST(SUM(At_bats) AS FLOAT) 
+        END AS SLG
+    FROM 
+        Hitters 
+    WHERE 
+        Player_ID = @PlayerID;
+END
+GO
+
+
+
+CREATE PROCEDURE CalculatePitcherStats
+    @PlayerID INT
+AS
+BEGIN
+    SELECT 
+        SUM(Base_on_balls) AS TotalWalks,
+        SUM(Hits) AS TotalHits,
+        SUM(Innings_Pitched) AS TotalInningsPitched,
+        SUM(Strike_outs) AS TotalStrikeOuts
+    FROM 
+        Pitchers 
+    WHERE 
+        Player_ID = @PlayerID;
+END
+GO
+
+CREATE PROCEDURE GetTeamNames
+AS
+BEGIN
+    SELECT Name FROM Teams;
+END;
+GO
+
+CREATE PROCEDURE InsertPlayer
+    @FirstName NVARCHAR(50),
+    @LastName NVARCHAR(50),
+    @TeamName NVARCHAR(100)
+AS
+BEGIN
+    DECLARE @TeamID INT
+
+    -- Get the ID of the team based on the provided team name
+    SELECT @TeamID = ID FROM Teams WHERE Name = @TeamName;
+
+    -- Insert the player with the obtained team ID
+    INSERT INTO Players (FirstName, LastName, Team_ID) VALUES (@FirstName, @LastName, @TeamID);
+END
+GO
+
+
+CREATE PROCEDURE DeletePlayer
+    @PlayerID INT
+AS
+BEGIN
+    DELETE FROM Players WHERE ID = @PlayerID;
+END
+GO
+
 

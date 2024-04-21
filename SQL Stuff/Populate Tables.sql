@@ -1,4 +1,4 @@
-/*
+
 INSERT Into Leagues (Name, Start_date)
 Values ('Major League Baseball', '2008-11-11');
 
@@ -65,7 +65,6 @@ values(1, 3, 8, 7, 8, 1, 3, 3.2, 0, 15);
 
 Insert into Pitchers (Game_ID, Player_ID, Runs, Earned_Runs, Hits, Base_on_balls, Strike_outs, Innings_Pitched, Home_runs, Number_pitches)
 values(1, 1, 16, 9, 6, 2, 7, 6, 1, 60);
-*/
 
 
 Select * from Hitters;

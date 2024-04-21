@@ -34,7 +34,7 @@ public class UseCase5 extends JFrame {
         try (Connection connection = DriverManager.getConnection(connectionUrl);
         Statement statement = connection.createStatement();)
         {
-            teamSet = statement.executeQuery("Select Name from Teams");
+            teamSet = statement.executeQuery("EXEC GetTeamNames;");
             int n = 0;
             while (teamSet.next()) {
                 System.out.println(teamSet.getString(1));
@@ -72,13 +72,14 @@ public class UseCase5 extends JFrame {
                 String team = teams[addPlayerTeamCombo.getSelectedIndex()];
                 try (Connection connection = DriverManager.getConnection(connectionUrl))
                 {
-                    String sql = "INSERT INTO Players (Firstname, Lastname, Team_ID) VALUES (?, ?, (Select ID From Teams where Name = ?))";
+                    String sql = "EXEC InsertPlayer @FirstName = ?, @LastName = ?, @TeamName = ?;";
                     PreparedStatement preparedStatement = connection.prepareStatement(sql);
                     preparedStatement.setString(1, fn);
                     preparedStatement.setString(2, ln);
                     preparedStatement.setString(3, team);
 
                     int rowsInserted = preparedStatement.executeUpdate();
+                    connection.commit();
 
                     if (rowsInserted > 0) {
                         System.out.println("A new row has been inserted successfully.");
@@ -107,7 +108,7 @@ public class UseCase5 extends JFrame {
          try (Connection connection = DriverManager.getConnection(connectionUrl);
         Statement statement = connection.createStatement();)
         {
-            nameSet = statement.executeQuery("SELECT ID, CONCAT(Firstname, ' ', Lastname) AS full_name FROM Players;");
+            nameSet = statement.executeQuery("EXEC GetPlayerFullName;");
             int n = 0;
             while (nameSet.next()) {
                 System.out.println(nameSet.getString(1));
@@ -128,7 +129,7 @@ public class UseCase5 extends JFrame {
                 String nid = String.valueOf(name_ids[removePlayerTeamCombo.getSelectedIndex()]);
                 try (Connection connection = DriverManager.getConnection(connectionUrl))
                 {
-                    String sql = "Delete Players where ID = ?;";
+                    String sql = "EXEC DeletePlayer @PlayerID = ?";
                     PreparedStatement preparedStatement = connection.prepareStatement(sql);
                     preparedStatement.setString(1, nid);
                     preparedStatement.executeUpdate();

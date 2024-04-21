@@ -33,7 +33,7 @@ public class UseCase3 extends JFrame {
          try (Connection connection = DriverManager.getConnection(connectionUrl);
         Statement statement = connection.createStatement();)
         {
-            nameSet = statement.executeQuery("SELECT ID, CONCAT(Firstname, ' ', Lastname) AS full_name FROM Players;");
+            nameSet = statement.executeQuery("EXEC GetPlayerFullName;");
             int n = 0;
             while (nameSet.next()) {
                 System.out.println(nameSet.getString(1));
@@ -72,7 +72,7 @@ public class UseCase3 extends JFrame {
                     try (Connection connection = DriverManager.getConnection(connectionUrl);
                     Statement statement = connection.createStatement();)
                     {
-                        String sql = "Select sum(Singe), sum(Doubles), sum(Triple), sum(Home_runs), sum(At_bats), sum(balls) as SLG from Hitters where Player_ID = ?;";
+                        String sql = "EXEC CalculateSLG @PlayerID = ?;";
                         PreparedStatement preparedStatement = connection.prepareStatement(sql);
                         preparedStatement.setString(1, playerId);
                         resultSet = preparedStatement.executeQuery();
@@ -101,7 +101,7 @@ public class UseCase3 extends JFrame {
                     try (Connection connection = DriverManager.getConnection(connectionUrl);
                     Statement statement = connection.createStatement();)
                     {
-                        String sql = "Select sum(Base_on_balls), sum(Hits), sum(Innings_Pitched), sum(Strike_outs) from Pitchers where Player_ID = ?;";
+                        String sql = "EXEC CalculatePitcherStats @PlayerID = ?;";
                         PreparedStatement preparedStatement = connection.prepareStatement(sql);
                         preparedStatement.setString(1, playerId);
                         resultSet = preparedStatement.executeQuery();
