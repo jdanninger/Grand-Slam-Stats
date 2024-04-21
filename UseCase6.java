@@ -3,7 +3,6 @@ import javax.swing.*;
 import java.awt.event.*;
 
 public class UseCase6 extends JFrame {
-
     String connectionUrl =
         "jdbc:sqlserver://cxp-sql-02\\jkd50;" 
         + "database=GrandSlamStats;" 
@@ -18,10 +17,10 @@ public class UseCase6 extends JFrame {
         frame.setSize(750, 700); // sets window size (x, y)
         frame.setTitle("Add/Remove/Modify Leagues and Division"); // sets jframe title
 
-        JPanel mainPanel = new JPanel();
+        JPanel mainPanel = new JPanel(); // Create New Panel
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        mainPanel.add(AddLeague());
+        mainPanel.add(AddLeague()); // Add all panels to the main panel
         mainPanel.add(AddNewDivison());
         mainPanel.add(deleteLeague());
         mainPanel.add(deleteDivision());
@@ -36,27 +35,31 @@ public class UseCase6 extends JFrame {
         frame.setVisible(true);
     }
 
-    private JPanel AddLeague(){
+    private JPanel AddLeague(){ //Add Leagues
         JPanel addTeamSection = new JPanel();
         addTeamSection.setBorder(BorderFactory.createTitledBorder("Add Leagues"));
 
-        JTextField BaseballLeague = new JTextField(25);
-        JTextField Start_Date = new JTextField(10);
+        JTextField BaseballLeague = new JTextField(25); // Variable 1
+        JTextField Start_Date = new JTextField(10); // Variable 2
 
-        JButton Create = new JButton("Create");
+        JButton Create = new JButton("Create"); // Button to Execute
         Create.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String NewLeague = BaseballLeague.getText();
                 String When_Created = Start_Date.getText();
                 try (Connection connection = DriverManager.getConnection(connectionUrl))
                 {
-                    String sql = "Begin Exec AddLeague ?,? End";
+                    String sql = "Begin Exec AddLeague ?,? End"; 
                     PreparedStatement preparedStatement = connection.prepareStatement(sql);
                     preparedStatement.setString(1, NewLeague);
                     preparedStatement.setDate(2,Date.valueOf(When_Created));
                     int rowsInserted = preparedStatement.executeUpdate();
-                    if (rowsInserted > 0) {
+                    if (rowsInserted > 0) { // Commit
+                        connection.commit();
                         System.out.println("A New League is successfully created.");
+                    }
+                    else {
+                        connection.rollback();
                     }
                 } catch (SQLException er) {
                     er.printStackTrace();
@@ -64,12 +67,12 @@ public class UseCase6 extends JFrame {
             }
         });
 
-        addTeamSection.add(new JLabel("New League"));
+        addTeamSection.add(new JLabel("New League")); //Create Composition for JPanel
         addTeamSection.add(BaseballLeague);
         addTeamSection.add(new JLabel("Starting Date(yyyy-mm-dd):"));
         addTeamSection.add(Start_Date);
         addTeamSection.add(Create);
-        return addTeamSection;
+        return addTeamSection; // Return the finzliaed Panel
     }
 
     private JPanel AddNewDivison(){
@@ -106,7 +109,7 @@ public class UseCase6 extends JFrame {
                     preparedStatement.setString(1, CreateDivision);
                     preparedStatement.setString(2, LeagueChoice);
                     int rowsInserted = preparedStatement.executeUpdate();
-                    if (rowsInserted > 0) {
+                    if (rowsInserted > 0) { //Commit
                         connection.commit();
                         System.out.println("A New Division Has Been Inserted Successfully.");
                     }
