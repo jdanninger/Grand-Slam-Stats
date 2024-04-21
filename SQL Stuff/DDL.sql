@@ -83,7 +83,7 @@ CREATE TABLE Hitters (
 	Game_ID INT,
 	Player_ID INT,
 	At_bats INT,
-	Singe Int,
+	Single INT,
 	Doubles INT,
 	Triple INT,
 	Home_runs INT,
