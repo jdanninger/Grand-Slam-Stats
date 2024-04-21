@@ -15,7 +15,7 @@ public class UseCase4 extends JFrame {
 
     UseCase4() {
         JFrame frame = new JFrame(); // creates Jframe (window)
-        frame.setSize(420, 600); // sets window size (x, y)
+        frame.setSize(420, 630); // sets window size (x, y)
         frame.setTitle("Add/Remove/Modify Teams and Their Arena"); // sets jframe title
 
         JPanel mainPanel = new JPanel();
@@ -23,10 +23,12 @@ public class UseCase4 extends JFrame {
 
         mainPanel.add(createNewTeam());
         mainPanel.add(updateTeamName());
+        mainPanel.add(updateTeamDivision());
         mainPanel.add(deleteTeam());
         mainPanel.add(createNewArena());
         mainPanel.add(deleteArena());
         mainPanel.add(updateTeamArenaOwning());
+        mainPanel.add(updateArenaInfo());
 
         add(mainPanel);
         setVisible(true);
@@ -140,6 +142,58 @@ public class UseCase4 extends JFrame {
         UpdateTeamName.add(Teambox);
         UpdateTeamName.add(Update);
         return UpdateTeamName;
+    }
+
+    private JPanel updateTeamDivision(){
+        ResultSet teamsList = null;
+        String[] teams = new String[100];
+        try (Connection connection = DriverManager.getConnection(connectionUrl);
+        Statement statement = connection.createStatement();)
+        {
+            teamsList = statement.executeQuery("Select NAME from Teams");
+            int n = 0;
+            while (teamsList.next()) {
+                System.out.println(teamsList.getString(1));
+                teams[n] = teamsList.getString(1);
+                n++;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JPanel UpdateTeamDivision = new JPanel();
+        UpdateTeamDivision.setBorder(BorderFactory.createTitledBorder("Update Division"));
+
+        JTextField NewDivision = new JTextField(25);
+        JComboBox<String> Teambox = new JComboBox<>(teams);
+        JButton Update = new JButton("Update");
+        Update.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String updateDivision = NewDivision.getText();
+                String TeamChoice = teams[Teambox.getSelectedIndex()];
+                try (Connection connection = DriverManager.getConnection(connectionUrl))
+                {
+                    String sql = "UPDATE Teams SET division_id = (select id from divisons where name = ?) where name = ?";
+                    PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                    preparedStatement.setString(1, updateDivision);
+                    preparedStatement.setString(2, TeamChoice);
+
+                    int rowsInserted = preparedStatement.executeUpdate();
+
+                    if (rowsInserted > 0) {
+                        System.out.println("The Team's Name Has Been Updated Successfully.");
+                    }
+                } catch (SQLException error) {
+                    error.printStackTrace();
+                }
+            }
+        });
+
+        UpdateTeamDivision.add(new JLabel("New Team Name"));
+        UpdateTeamDivision.add(NewDivision);
+        UpdateTeamDivision.add(new JLabel("Team:"));
+        UpdateTeamDivision.add(Teambox);
+        UpdateTeamDivision.add(Update);
+        return UpdateTeamDivision;
     }
 
     private JPanel deleteTeam(){
@@ -351,6 +405,59 @@ public class UseCase4 extends JFrame {
         MakeArenaName.add(TeamBoxCombo);
         MakeArenaName.add(Change);
         return MakeArenaName;
+    }
+
+    private JPanel updateArenaInfo(){
+        ResultSet arenaList = null;
+        String[] arenas = new String[100];
+        try (Connection connection = DriverManager.getConnection(connectionUrl);
+        Statement statement = connection.createStatement();)
+        {
+            arenaList = statement.executeQuery("Select NAME from Arenas");
+            int n = 0;
+            while (arenaList.next()) {
+                arenas[n] = arenaList.getString(1);
+                n++;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        JPanel UpdateArena = new JPanel();
+        UpdateArena.setBorder(BorderFactory.createTitledBorder("Arena Information Update")); 
+        JComboBox<String> ArenaBoxCombo = new JComboBox<>(arenas);
+        JTextField UpdateArenaName = new JTextField(10);
+        JTextField UpdateArenaCapacity = new JTextField(10);
+        JButton Update = new JButton("Update Arena");
+        Update.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String name = UpdateArenaName.getText();
+                String capacity = UpdateArenaCapacity.getText();
+                String originalname = arenas[ArenaBoxCombo.getSelectedIndex()];
+                try (Connection connection = DriverManager.getConnection(connectionUrl))
+                {
+                    String sql = "UPDATE Arenas SET name = ?, Capacity = ? where name = ?";
+                    PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                    preparedStatement.setString(1, name);
+                    preparedStatement.setString(2, capacity);
+                    preparedStatement.setString(3, originalname);
+                    int rowsInserted = preparedStatement.executeUpdate();
+                    if (rowsInserted > 0) {
+                        System.out.println("Information of Arena is updated");
+                    }
+                } catch (SQLException er) {
+                    er.printStackTrace();
+                }
+            }
+        });
+
+        UpdateArena.add(new JLabel("Arena:"));
+        UpdateArena.add(ArenaBoxCombo);
+        UpdateArena.add(new JLabel("New Name"));
+        UpdateArena.add(UpdateArenaName);
+        UpdateArena.add(new JLabel("New Capacity"));
+        UpdateArena.add(UpdateArenaCapacity);
+        UpdateArena.add(Update);
+        return UpdateArena;
     }
 
 
