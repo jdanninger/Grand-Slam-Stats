@@ -126,7 +126,7 @@ public class UseCase2 extends JFrame {
         int homeRuns = Integer.parseInt(homeRunsField.getText());
         int balls = Integer.parseInt(ballsField.getText());
 
-        String sql = "INSERT INTO Hitters (Game_ID, Player_ID, At_bats, Single, [Double], [Triple], Home_runs, Balls) " +
+        String sql = "INSERT INTO Hitters (Game_ID, Player_ID, At_bats, Singe, [Double], Triple, Home_runs, Balls) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DriverManager.getConnection(connectionUrl);
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -163,7 +163,7 @@ public class UseCase2 extends JFrame {
         int homeRuns = Integer.parseInt(homeRunsField.getText());
         int balls = Integer.parseInt(ballsField.getText());
     
-        String sql = "UPDATE Hitters SET At_bats = ?, Single = ?, [Double] = ?, [Triple] = ?, Home_runs = ?, Balls = ? " +
+        String sql = "UPDATE Hitters SET At_bats = ?, Single = ?, [Double] = ?, Triple = ?, Home_runs = ?, Balls = ? " +
                      "WHERE Game_ID = ? AND Player_ID = ?";
         try (Connection conn = DriverManager.getConnection(connectionUrl);
              PreparedStatement ps = conn.prepareStatement(sql)) {
