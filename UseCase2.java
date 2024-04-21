@@ -26,6 +26,7 @@ public class UseCase2 extends JFrame {
         setSize(400, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setupUI();
+        setVisible(true);
     }
 
     private void setupUI() {
@@ -151,7 +152,7 @@ public class UseCase2 extends JFrame {
         }
     }
 
-    
+
     private void modifyHitterStats() {
         int gameID = (Integer) gameIDComboBox.getSelectedItem();
         int playerID = (Integer) playerIDComboBox.getSelectedItem();
@@ -214,6 +215,11 @@ public class UseCase2 extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new UseCase2().setVisible(true));
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new UseCase2().setVisible(true);
+            }
+        });
     }
 }

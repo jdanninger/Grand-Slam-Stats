@@ -19,7 +19,7 @@ public class Main{
             }
         });
 
-        JButton button2 = new JButton("use case 2");
+        JButton button2 = new JButton("Add/Remove/Modify Statistics of Hitters");
         button2.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new UseCase2();
